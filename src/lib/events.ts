@@ -6,6 +6,7 @@ export const EVENT_CATALOG: EventDefinition[] = [
   { id: "man", emoji: "👨", label: "男", category: "people", persistence: "persistent", stackable: true, sortOrder: 1 },
   { id: "girl", emoji: "👧", label: "小女孩", category: "people", persistence: "persistent", stackable: true, sortOrder: 2 },
   { id: "boy", emoji: "👦", label: "小男孩", category: "people", persistence: "persistent", stackable: true, sortOrder: 3 },
+  { id: "heart", emoji: "❤️", label: "爱心", category: "people", persistence: "persistent", stackable: false, sortOrder: 4 },
 
   // ── 感情 love ──
   { id: "dating", emoji: "👫", label: "恋爱", category: "love", persistence: "persistent", stackable: false, sortOrder: 5 },
