@@ -1,8 +1,14 @@
 import type { EventDefinition } from "@/types/timeline";
 
 export const EVENT_CATALOG: EventDefinition[] = [
+  // ── 人物 people ──
+  { id: "woman", emoji: "👩", label: "女", category: "people", persistence: "persistent", stackable: true, sortOrder: 0 },
+  { id: "man", emoji: "👨", label: "男", category: "people", persistence: "persistent", stackable: true, sortOrder: 1 },
+  { id: "girl", emoji: "👧", label: "小女孩", category: "people", persistence: "persistent", stackable: true, sortOrder: 2 },
+  { id: "boy", emoji: "👦", label: "小男孩", category: "people", persistence: "persistent", stackable: true, sortOrder: 3 },
+
   // ── 感情 love ──
-  { id: "dating", emoji: "👫", label: "恋爱", category: "love", persistence: "persistent", stackable: false, sortOrder: 1 },
+  { id: "dating", emoji: "👫", label: "恋爱", category: "love", persistence: "persistent", stackable: false, sortOrder: 5 },
   { id: "dating_mm", emoji: "👬", label: "恋爱(男男)", category: "love", persistence: "persistent", stackable: false, sortOrder: 2 },
   { id: "dating_ff", emoji: "👭", label: "恋爱(女女)", category: "love", persistence: "persistent", stackable: false, sortOrder: 3 },
   { id: "crush", emoji: "💗", label: "暗恋", category: "love", persistence: "one-time", stackable: false, sortOrder: 4 },
@@ -79,6 +85,7 @@ export const EVENT_CATALOG: EventDefinition[] = [
 export const EVENT_MAP = new Map(EVENT_CATALOG.map((e) => [e.id, e]));
 
 export const CATEGORIES = [
+  { id: "people" as const, label: "人物", icon: "👤" },
   { id: "love" as const, label: "感情", icon: "💕" },
   { id: "family" as const, label: "家庭", icon: "👨‍👩‍👧" },
   { id: "education" as const, label: "学业", icon: "📚" },

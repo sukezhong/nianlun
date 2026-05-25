@@ -19,7 +19,7 @@ export default function EventPicker({
   onRemove,
   onClose,
 }: EventPickerProps) {
-  const [activeCategory, setActiveCategory] = useState<EventCategory>("love");
+  const [activeCategory, setActiveCategory] = useState<EventCategory>("people");
 
   const categoryEvents = EVENT_CATALOG.filter((e) => e.category === activeCategory);
 
