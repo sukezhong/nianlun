@@ -161,9 +161,20 @@ export default function CreateWizard() {
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 24 }}>
-          {computedRows.map((row) => (
-            <YearRow key={row.year} row={row} onEdit={() => setEditingYear(row.year)} />
-          ))}
+          {Array.from(
+            { length: timeline.endYear - timeline.startYear + 1 },
+            (_, i) => timeline.startYear + i
+          ).map((year) => {
+            const entry = timeline.years.find((y) => y.year === year);
+            return (
+              <YearRow
+                key={year}
+                year={year}
+                events={entry?.events ?? []}
+                onEdit={() => setEditingYear(year)}
+              />
+            );
+          })}
         </div>
 
         <button
