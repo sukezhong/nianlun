@@ -1,11 +1,14 @@
 "use client";
 
 import { useRef, useState, forwardRef, useImperativeHandle } from "react";
-import type { ComputedYearRow } from "@/types/timeline";
+interface TimelineRow {
+  year: number;
+  emojis: string[];
+}
 
 interface TimelineImageProps {
   title: string;
-  rows: ComputedYearRow[];
+  rows: TimelineRow[];
   interpretation?: string;
 }
 

@@ -2,12 +2,23 @@
 
 import { useState, useMemo, useRef } from "react";
 import { useTimeline } from "@/hooks/use-timeline";
-import { computeTimeline } from "@/lib/accumulation";
+import { EVENT_MAP } from "@/lib/events";
+import type { YearEvent } from "@/types/timeline";
 import YearRow from "@/components/timeline/year-row";
 import EventPicker from "@/components/timeline/event-picker";
 import TimelineImage, { type TimelineImageHandle } from "@/components/timeline/timeline-image";
 
 type Step = "setup" | "edit" | "preview";
+
+function eventsToEmojis(events: YearEvent[]): string[] {
+  const emojis: string[] = [];
+  for (const ye of events) {
+    const def = EVENT_MAP.get(ye.eventId);
+    if (!def) continue;
+    for (let i = 0; i < ye.count; i++) emojis.push(def.emoji);
+  }
+  return emojis;
+}
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 1969 }, (_, i) => 1970 + i);
@@ -20,7 +31,14 @@ export default function CreateWizard() {
   const [interpreting, setInterpreting] = useState(false);
   const imageRef = useRef<TimelineImageHandle>(null);
 
-  const computedRows = useMemo(() => computeTimeline(timeline), [timeline]);
+  const rawRows = useMemo(() => {
+    const rows: { year: number; emojis: string[] }[] = [];
+    for (let y = timeline.startYear; y <= timeline.endYear; y++) {
+      const entry = timeline.years.find((e) => e.year === y);
+      rows.push({ year: y, emojis: eventsToEmojis(entry?.events ?? []) });
+    }
+    return rows;
+  }, [timeline]);
   const hasEvents = timeline.years.some((y) => y.events.length > 0);
 
   async function fetchInterpretation() {
@@ -231,7 +249,7 @@ export default function CreateWizard() {
           {timeline.title}
         </div>
         <div style={{ height: 1, background: "#eee", marginBottom: 16 }} />
-        {computedRows.map((row) => (
+        {rawRows.map((row) => (
           <div key={row.year} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: "#999", width: 36, textAlign: "right", flexShrink: 0 }}>
               {row.year}
@@ -257,7 +275,7 @@ export default function CreateWizard() {
         )}
       </div>
 
-      <TimelineImage ref={imageRef} title={timeline.title} rows={computedRows} interpretation={interpretation} />
+      <TimelineImage ref={imageRef} title={timeline.title} rows={rawRows} interpretation={interpretation} />
     </main>
   );
 }
