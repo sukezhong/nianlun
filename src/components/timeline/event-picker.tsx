@@ -19,7 +19,7 @@ export default function EventPicker({
   onRemove,
   onClose,
 }: EventPickerProps) {
-  const [activeCategory, setActiveCategory] = useState<EventCategory>("people");
+  const [activeCategory, setActiveCategory] = useState<EventCategory>("love");
 
   const categoryEvents = EVENT_CATALOG.filter((e) => e.category === activeCategory);
 
@@ -54,9 +54,10 @@ export default function EventPicker({
           position: "relative",
           background: "#fff",
           borderRadius: "16px 16px 0 0",
-          padding: "20px 20px 32px",
-          maxHeight: "60vh",
-          overflow: "auto",
+          padding: "20px 0 32px",
+          maxHeight: "65vh",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {/* Header */}
@@ -65,11 +66,13 @@ export default function EventPicker({
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: 16,
+          padding: "0 20px",
         }}>
           <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1a1a" }}>
             {year}年 · 发生了什么
           </span>
           <button
+            type="button"
             onClick={onClose}
             style={{
               fontSize: 13,
@@ -84,24 +87,34 @@ export default function EventPicker({
           </button>
         </div>
 
-        {/* Category Tabs */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {/* Category Tabs - horizontal scroll */}
+        <div style={{
+          display: "flex",
+          gap: 8,
+          marginBottom: 16,
+          padding: "0 20px",
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
+          flexShrink: 0,
+        }}>
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
+              type="button"
               onClick={() => setActiveCategory(cat.id)}
               style={{
-                flex: 1,
-                padding: "8px 0",
+                padding: "7px 14px",
                 fontSize: 13,
                 fontWeight: 500,
                 border: "1px solid",
                 borderColor: activeCategory === cat.id ? "#1a1a1a" : "#eee",
                 background: activeCategory === cat.id ? "#1a1a1a" : "#fff",
                 color: activeCategory === cat.id ? "#fff" : "#666",
-                borderRadius: 8,
+                borderRadius: 20,
                 cursor: "pointer",
-                transition: "all 0.15s",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
               }}
             >
               {cat.icon} {cat.label}
@@ -109,82 +122,89 @@ export default function EventPicker({
           ))}
         </div>
 
-        {/* Event Grid */}
+        {/* Event Grid - scrollable */}
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 10,
+          padding: "0 20px",
+          overflowY: "auto",
+          flex: 1,
         }}>
-          {categoryEvents.map((event) => {
-            const count = getCount(event.id);
-            const isActive = count > 0;
-            const def = EVENT_MAP.get(event.id)!;
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 10,
+          }}>
+            {categoryEvents.map((event) => {
+              const count = getCount(event.id);
+              const isActive = count > 0;
+              const def = EVENT_MAP.get(event.id)!;
 
-            return (
-              <div key={event.id} style={{ textAlign: "center" }}>
-                <button
-                  onClick={() => {
-                    if (!isActive || def.stackable) {
-                      onAdd(event.id);
-                    } else {
-                      onRemove(event.id);
-                    }
-                  }}
-                  style={{
-                    width: 56,
-                    height: 56,
-                    fontSize: 28,
-                    border: "2px solid",
-                    borderColor: isActive ? "#e07a7a" : "#f0f0f0",
-                    background: isActive ? "#fff5f5" : "#fafafa",
-                    borderRadius: 12,
-                    cursor: "pointer",
-                    position: "relative",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  {event.emoji}
-                  {count > 1 && (
-                    <span style={{
-                      position: "absolute",
-                      top: -4,
-                      right: -4,
-                      width: 18,
-                      height: 18,
-                      borderRadius: "50%",
-                      background: "#e07a7a",
-                      color: "#fff",
-                      fontSize: 10,
-                      fontWeight: 700,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
-                      {count}
-                    </span>
-                  )}
-                </button>
-                <div style={{ fontSize: 11, color: "#999", marginTop: 4 }}>
-                  {event.label}
-                </div>
-                {isActive && def.stackable && (
+              return (
+                <div key={event.id} style={{ textAlign: "center" }}>
                   <button
-                    onClick={() => onRemove(event.id)}
+                    type="button"
+                    onClick={() => {
+                      if (!isActive || def.stackable) {
+                        onAdd(event.id);
+                      } else {
+                        onRemove(event.id);
+                      }
+                    }}
                     style={{
-                      fontSize: 10,
-                      color: "#e07a7a",
-                      background: "none",
-                      border: "none",
+                      width: 56,
+                      height: 56,
+                      fontSize: 28,
+                      border: "2px solid",
+                      borderColor: isActive ? "#e07a7a" : "#f0f0f0",
+                      background: isActive ? "#fff5f5" : "#fafafa",
+                      borderRadius: 12,
                       cursor: "pointer",
-                      marginTop: 2,
+                      position: "relative",
                     }}
                   >
-                    减少
+                    {event.emoji}
+                    {count > 1 && (
+                      <span style={{
+                        position: "absolute",
+                        top: -4,
+                        right: -4,
+                        width: 18,
+                        height: 18,
+                        borderRadius: "50%",
+                        background: "#e07a7a",
+                        color: "#fff",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}>
+                        {count}
+                      </span>
+                    )}
                   </button>
-                )}
-              </div>
-            );
-          })}
+                  <div style={{ fontSize: 11, color: "#999", marginTop: 4 }}>
+                    {event.label}
+                  </div>
+                  {isActive && def.stackable && (
+                    <button
+                      type="button"
+                      onClick={() => onRemove(event.id)}
+                      style={{
+                        fontSize: 10,
+                        color: "#e07a7a",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        marginTop: 2,
+                      }}
+                    >
+                      减少
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

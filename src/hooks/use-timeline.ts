@@ -13,7 +13,7 @@ type Action =
 const currentYear = new Date().getFullYear();
 
 const initialState: Timeline = {
-  title: "",
+  title: "我们的十年",
   startYear: currentYear - 9,
   endYear: currentYear,
   years: [],

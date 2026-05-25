@@ -1,6 +1,14 @@
 export type EventPersistence = "persistent" | "one-time";
 
-export type EventCategory = "people" | "lifestyle" | "milestone";
+export type EventCategory =
+  | "love"
+  | "family"
+  | "education"
+  | "career"
+  | "life"
+  | "pet"
+  | "growth"
+  | "hardship";
 
 export interface EventDefinition {
   id: string;

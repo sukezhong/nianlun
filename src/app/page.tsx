@@ -1,4 +1,3 @@
-import Link from "next/link";
 
 const EXAMPLE_ROWS = [
   { year: 2016, emojis: ["👫"] },
@@ -91,7 +90,7 @@ export default function HomePage() {
       </div>
 
       {/* CTA */}
-      <Link
+      <a
         href="/create"
         className="block text-center"
         style={{
@@ -108,7 +107,7 @@ export default function HomePage() {
         }}
       >
         创建你的年轮
-      </Link>
+      </a>
 
       {/* Footer */}
       <div className="mt-auto pt-12 text-center">
