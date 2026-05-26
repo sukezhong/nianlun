@@ -190,6 +190,7 @@ export default function CreateWizard() {
                 year={year}
                 events={entry?.events ?? []}
                 onEdit={() => setEditingYear(year)}
+                onMove={(from, to) => moveEvent(year, from, to)}
               />
             );
           })}
