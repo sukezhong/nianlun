@@ -220,7 +220,6 @@ export default function CreateWizard() {
             selectedEvents={editingEntry?.events ?? []}
             onAdd={(eventId) => addEvent(editingYear, eventId)}
             onRemove={(eventId) => removeEvent(editingYear, eventId)}
-            onMove={(from, to) => moveEvent(editingYear, from, to)}
             onClose={() => setEditingYear(null)}
           />
         )}
