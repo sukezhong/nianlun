@@ -20,6 +20,26 @@ function eventsToEmojis(events: YearEvent[]): string[] {
   return emojis;
 }
 
+interface MergedRow {
+  startYear: number;
+  endYear: number;
+  emojis: string[];
+}
+
+function mergeConsecutiveRows(rows: { year: number; emojis: string[] }[]): MergedRow[] {
+  const merged: MergedRow[] = [];
+  for (const row of rows) {
+    const key = row.emojis.join("");
+    const last = merged[merged.length - 1];
+    if (last && last.emojis.join("") === key) {
+      last.endYear = row.year;
+    } else {
+      merged.push({ startYear: row.year, endYear: row.year, emojis: [...row.emojis] });
+    }
+  }
+  return merged;
+}
+
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 1969 }, (_, i) => 1970 + i);
 
@@ -39,6 +59,7 @@ export default function CreateWizard() {
     }
     return rows;
   }, [timeline]);
+  const mergedRows = useMemo(() => mergeConsecutiveRows(rawRows), [rawRows]);
   const hasEvents = timeline.years.some((y) => y.events.length > 0);
 
   async function fetchInterpretation() {
@@ -254,16 +275,28 @@ export default function CreateWizard() {
           {timeline.title}
         </div>
         <div style={{ height: 1, background: "#eee", marginBottom: 16 }} />
-        {rawRows.map((row) => (
-          <div key={row.year} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#999", width: 36, textAlign: "right", flexShrink: 0 }}>
-              {row.year}
-            </span>
-            <span style={{ fontSize: 22, lineHeight: 1.5 }}>
-              {row.emojis.length > 0 ? row.emojis.join("") : "—"}
-            </span>
-          </div>
-        ))}
+        {mergedRows.map((row) => {
+          const yearLabel = row.startYear === row.endYear
+            ? `${row.startYear}`
+            : `${row.startYear}-${row.endYear}`;
+          return (
+            <div key={row.startYear} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+              <span style={{
+                fontSize: row.startYear === row.endYear ? 12 : 10,
+                fontWeight: 600,
+                color: "#999",
+                width: 56,
+                textAlign: "right",
+                flexShrink: 0,
+              }}>
+                {yearLabel}
+              </span>
+              <span style={{ fontSize: 22, lineHeight: 1.5 }}>
+                {row.emojis.length > 0 ? row.emojis.join("") : "—"}
+              </span>
+            </div>
+          );
+        })}
 
         {interpreting && (
           <div style={{ textAlign: "center", marginTop: 16 }}>
@@ -280,7 +313,7 @@ export default function CreateWizard() {
         )}
       </div>
 
-      <TimelineImage ref={imageRef} title={timeline.title} rows={rawRows} interpretation={interpretation} />
+      <TimelineImage ref={imageRef} title={timeline.title} rows={mergedRows} interpretation={interpretation} />
     </main>
   );
 }

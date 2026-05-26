@@ -1,14 +1,15 @@
 "use client";
 
 import { useRef, useState, forwardRef, useImperativeHandle } from "react";
-interface TimelineRow {
-  year: number;
+interface MergedRow {
+  startYear: number;
+  endYear: number;
   emojis: string[];
 }
 
 interface TimelineImageProps {
   title: string;
-  rows: TimelineRow[];
+  rows: MergedRow[];
   interpretation?: string;
 }
 
@@ -114,31 +115,36 @@ const TimelineImage = forwardRef<TimelineImageHandle, TimelineImageProps>(
 
           {/* Timeline rows */}
           <div style={{ marginBottom: 20 }}>
-            {rows.map((row) => (
-              <div
-                key={row.year}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  marginBottom: 8,
-                }}
-              >
-                <span style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#999",
-                  width: 36,
-                  textAlign: "right",
-                  flexShrink: 0,
-                }}>
-                  {row.year}
-                </span>
-                <span style={{ fontSize: 22, lineHeight: 1.5 }}>
-                  {row.emojis.join("")}
-                </span>
-              </div>
-            ))}
+            {rows.map((row) => {
+              const yearLabel = row.startYear === row.endYear
+                ? `${row.startYear}`
+                : `${row.startYear}-${row.endYear}`;
+              return (
+                <div
+                  key={row.startYear}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    marginBottom: 8,
+                  }}
+                >
+                  <span style={{
+                    fontSize: row.startYear === row.endYear ? 12 : 10,
+                    fontWeight: 600,
+                    color: "#999",
+                    width: 56,
+                    textAlign: "right",
+                    flexShrink: 0,
+                  }}>
+                    {yearLabel}
+                  </span>
+                  <span style={{ fontSize: 22, lineHeight: 1.5 }}>
+                    {row.emojis.join("")}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
           {/* AI Interpretation */}
