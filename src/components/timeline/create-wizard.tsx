@@ -24,7 +24,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 1969 }, (_, i) => 1970 + i);
 
 export default function CreateWizard() {
-  const { timeline, setTitle, setYears, addEvent, removeEvent } = useTimeline();
+  const { timeline, setTitle, setYears, addEvent, removeEvent, moveEvent } = useTimeline();
   const [step, setStep] = useState<Step>("setup");
   const [editingYear, setEditingYear] = useState<number | null>(null);
   const [interpretation, setInterpretation] = useState<string>("");
@@ -219,6 +219,7 @@ export default function CreateWizard() {
             selectedEvents={editingEntry?.events ?? []}
             onAdd={(eventId) => addEvent(editingYear, eventId)}
             onRemove={(eventId) => removeEvent(editingYear, eventId)}
+            onMove={(from, to) => moveEvent(editingYear, from, to)}
             onClose={() => setEditingYear(null)}
           />
         )}

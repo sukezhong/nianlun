@@ -9,6 +9,7 @@ interface EventPickerProps {
   selectedEvents: YearEvent[];
   onAdd: (eventId: string) => void;
   onRemove: (eventId: string) => void;
+  onMove: (fromIndex: number, toIndex: number) => void;
   onClose: () => void;
 }
 
@@ -17,6 +18,7 @@ export default function EventPicker({
   selectedEvents,
   onAdd,
   onRemove,
+  onMove,
   onClose,
 }: EventPickerProps) {
   const [activeCategory, setActiveCategory] = useState<EventCategory>("people");
@@ -26,6 +28,16 @@ export default function EventPicker({
   function getCount(eventId: string): number {
     return selectedEvents.find((e) => e.eventId === eventId)?.count ?? 0;
   }
+
+  // Build flat emoji list for reorder bar (expand stackable counts)
+  const flatEmojis: { eventId: string; emoji: string; sourceIndex: number }[] = [];
+  selectedEvents.forEach((ye, idx) => {
+    const def = EVENT_MAP.get(ye.eventId);
+    if (!def) return;
+    for (let i = 0; i < ye.count; i++) {
+      flatEmojis.push({ eventId: ye.eventId, emoji: def.emoji, sourceIndex: idx });
+    }
+  });
 
   return (
     <div
@@ -55,7 +67,7 @@ export default function EventPicker({
           background: "#fff",
           borderRadius: "16px 16px 0 0",
           padding: "20px 0 32px",
-          maxHeight: "65vh",
+          maxHeight: "70vh",
           display: "flex",
           flexDirection: "column",
         }}
@@ -65,7 +77,7 @@ export default function EventPicker({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 16,
+          marginBottom: 12,
           padding: "0 20px",
         }}>
           <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1a1a" }}>
@@ -86,6 +98,88 @@ export default function EventPicker({
             完成
           </button>
         </div>
+
+        {/* Reorder Bar — shows current selection with move buttons */}
+        {selectedEvents.length > 0 && (
+          <div style={{
+            padding: "0 20px",
+            marginBottom: 12,
+            flexShrink: 0,
+          }}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "8px 12px",
+              background: "#f8f8f8",
+              borderRadius: 10,
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+            }}>
+              <span style={{ fontSize: 11, color: "#bbb", marginRight: 4, flexShrink: 0 }}>
+                排序
+              </span>
+              {selectedEvents.map((ye, idx) => {
+                const def = EVENT_MAP.get(ye.eventId);
+                if (!def) return null;
+                return (
+                  <div key={ye.eventId} style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
+                    {idx > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => onMove(idx, idx - 1)}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          fontSize: 10,
+                          color: "#999",
+                          background: "#eee",
+                          border: "none",
+                          borderRadius: 4,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        ←
+                      </button>
+                    )}
+                    <span style={{
+                      fontSize: 22,
+                      lineHeight: 1,
+                      padding: "2px 2px",
+                    }}>
+                      {def.emoji}{ye.count > 1 ? `×${ye.count}` : ""}
+                    </span>
+                    {idx < selectedEvents.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() => onMove(idx, idx + 1)}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          fontSize: 10,
+                          color: "#999",
+                          background: "#eee",
+                          border: "none",
+                          borderRadius: 4,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        →
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Category Tabs - horizontal scroll */}
         <div style={{

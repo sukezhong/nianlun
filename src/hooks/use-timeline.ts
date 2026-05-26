@@ -8,6 +8,7 @@ type Action =
   | { type: "SET_YEARS"; startYear: number; endYear: number }
   | { type: "ADD_EVENT"; year: number; eventId: string }
   | { type: "REMOVE_EVENT"; year: number; eventId: string }
+  | { type: "MOVE_EVENT"; year: number; fromIndex: number; toIndex: number }
   | { type: "RESET" };
 
 const currentYear = new Date().getFullYear();
@@ -70,6 +71,18 @@ function reducer(state: Timeline, action: Action): Timeline {
       return { ...state, years: allYears };
     }
 
+    case "MOVE_EVENT": {
+      const yearEntry = getOrCreateYear(state.years, action.year);
+      const events = [...yearEntry.events];
+      const { fromIndex, toIndex } = action;
+      if (fromIndex < 0 || fromIndex >= events.length || toIndex < 0 || toIndex >= events.length) return state;
+      const [moved] = events.splice(fromIndex, 1);
+      events.splice(toIndex, 0, moved);
+      const updatedYear: YearEntry = { ...yearEntry, events };
+      const otherYears = state.years.filter((y) => y.year !== action.year);
+      return { ...state, years: [...otherYears, updatedYear].sort((a, b) => a.year - b.year) };
+    }
+
     case "RESET":
       return initialState;
 
@@ -94,7 +107,12 @@ export function useTimeline() {
     (year: number, eventId: string) => dispatch({ type: "REMOVE_EVENT", year, eventId }),
     []
   );
+  const moveEvent = useCallback(
+    (year: number, fromIndex: number, toIndex: number) =>
+      dispatch({ type: "MOVE_EVENT", year, fromIndex, toIndex }),
+    []
+  );
   const reset = useCallback(() => dispatch({ type: "RESET" }), []);
 
-  return { timeline, setTitle, setYears, addEvent, removeEvent, reset };
+  return { timeline, setTitle, setYears, addEvent, removeEvent, moveEvent, reset };
 }
