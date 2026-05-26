@@ -32,13 +32,27 @@ const TimelineImage = forwardRef<TimelineImageHandle, TimelineImageProps>(
 
       try {
         const html2canvas = (await import("html2canvas")).default;
-        const canvas = await html2canvas(cardRef.current, {
+        const rawCanvas = await html2canvas(cardRef.current, {
           scale: 3,
           backgroundColor: "#ffffff",
           useCORS: true,
         });
 
-        if (navigator.share && navigator.canShare) {
+        // Resize to exact 1080×1440 (小红书 3:4 cover)
+        const TARGET_W = 1080;
+        const TARGET_H = 1440;
+        const canvas = document.createElement("canvas");
+        canvas.width = TARGET_W;
+        canvas.height = TARGET_H;
+        const ctx = canvas.getContext("2d")!;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, TARGET_W, TARGET_H);
+        // Center the rendered content vertically
+        const yOffset = Math.max(0, Math.floor((TARGET_H - rawCanvas.height) / 2));
+        ctx.drawImage(rawCanvas, 0, yOffset);
+
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile && navigator.share && navigator.canShare) {
           const blob = await new Promise<Blob | null>((resolve) =>
             canvas.toBlob(resolve, "image/png")
           );
@@ -59,7 +73,8 @@ const TimelineImage = forwardRef<TimelineImageHandle, TimelineImageProps>(
         link.href = canvas.toDataURL("image/png");
         link.click();
         setStatus("done");
-      } catch {
+      } catch (err) {
+        console.error("Image generation failed:", err);
         setStatus("idle");
       }
     }
@@ -71,6 +86,7 @@ const TimelineImage = forwardRef<TimelineImageHandle, TimelineImageProps>(
           ref={cardRef}
           style={{
             width: 360,
+            minHeight: 480,
             background: "#ffffff",
             padding: "48px 28px 36px",
             position: "absolute",
@@ -164,18 +180,8 @@ const TimelineImage = forwardRef<TimelineImageHandle, TimelineImageProps>(
             </>
           )}
 
-          {/* Divider */}
-          <div style={{ height: 1, background: "#f0f0f0", margin: "20px 0 16px" }} />
-
-          {/* Footer watermark */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "#ccc", letterSpacing: "0.04em" }}>
-              扫码生成你的年轮
-            </div>
-            <div style={{ fontSize: 9, color: "#ddd", letterSpacing: "0.02em", marginTop: 4 }}>
-              nianlun.earthonline.site
-            </div>
-          </div>
+          {/* Bottom divider */}
+          <div style={{ height: 1, background: "#f0f0f0", marginTop: 20 }} />
         </div>
 
         {/* Share button */}
