@@ -111,7 +111,7 @@ const TimelineImage = forwardRef<TimelineImageHandle, TimelineImageProps>(
               letterSpacing: "0.12em",
               marginTop: 4,
             }}>
-              NIANLUN
+              ANNUAL RINGS
             </div>
           </div>
 
@@ -180,8 +180,20 @@ const TimelineImage = forwardRef<TimelineImageHandle, TimelineImageProps>(
             </>
           )}
 
-          {/* Bottom divider */}
-          <div style={{ height: 1, background: "#f0f0f0", marginTop: 20 }} />
+          {/* Divider */}
+          <div style={{ height: 1, background: "#f0f0f0", margin: "20px 0 16px" }} />
+
+          {/* Footer brand */}
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              fontSize: 12,
+              color: "#ccc",
+              letterSpacing: "0.06em",
+              fontWeight: 300,
+            }}>
+              年轮
+            </div>
+          </div>
         </div>
 
         {/* Share button */}
