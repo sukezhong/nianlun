@@ -6,26 +6,63 @@ import type { EventCategory, YearEvent } from "@/types/timeline";
 
 interface EventPickerProps {
   year: number;
+  timelineStartYear: number;
+  timelineEndYear: number;
   selectedEvents: YearEvent[];
   onAdd: (eventId: string) => void;
   onRemove: (eventId: string) => void;
+  onBatchAdd: (startYear: number, endYear: number, eventId: string) => void;
+  onBatchRemove: (startYear: number, endYear: number, eventId: string) => void;
   onClose: () => void;
 }
 
 export default function EventPicker({
   year,
+  timelineStartYear,
+  timelineEndYear,
   selectedEvents,
   onAdd,
   onRemove,
+  onBatchAdd,
+  onBatchRemove,
   onClose,
 }: EventPickerProps) {
   const [activeCategory, setActiveCategory] = useState<EventCategory>("people");
+  const [rangeStart, setRangeStart] = useState(year);
+  const [rangeEnd, setRangeEnd] = useState(year);
 
+  const isRangeMode = rangeStart !== rangeEnd;
   const categoryEvents = EVENT_CATALOG.filter((e) => e.category === activeCategory);
+
+  // Build year options for range selectors
+  const yearOptions: number[] = [];
+  for (let y = timelineStartYear; y <= timelineEndYear; y++) {
+    yearOptions.push(y);
+  }
 
   function getCount(eventId: string): number {
     return selectedEvents.find((e) => e.eventId === eventId)?.count ?? 0;
   }
+
+  function handleAdd(eventId: string) {
+    if (isRangeMode) {
+      onBatchAdd(rangeStart, rangeEnd, eventId);
+    } else {
+      onAdd(eventId);
+    }
+  }
+
+  function handleRemove(eventId: string) {
+    if (isRangeMode) {
+      onBatchRemove(rangeStart, rangeEnd, eventId);
+    } else {
+      onRemove(eventId);
+    }
+  }
+
+  const headerText = isRangeMode
+    ? `${rangeStart}-${rangeEnd}年 · 批量添加`
+    : `${year}年 · 发生了什么`;
 
   return (
     <div
@@ -65,11 +102,11 @@ export default function EventPicker({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 12,
+          marginBottom: 8,
           padding: "0 20px",
         }}>
           <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1a1a" }}>
-            {year}年 · 发生了什么
+            {headerText}
           </span>
           <button
             type="button"
@@ -85,6 +122,67 @@ export default function EventPicker({
           >
             完成
           </button>
+        </div>
+
+        {/* Range Selector */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "0 20px",
+          marginBottom: 12,
+        }}>
+          <span style={{ fontSize: 12, color: "#999", flexShrink: 0 }}>时间段</span>
+          <select
+            value={rangeStart}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setRangeStart(v);
+              if (v > rangeEnd) setRangeEnd(v);
+            }}
+            style={{
+              flex: 1,
+              padding: "6px 8px",
+              fontSize: 13,
+              border: "1px solid #eee",
+              borderRadius: 6,
+              outline: "none",
+              color: "#1a1a1a",
+              background: "#fff",
+            }}
+          >
+            {yearOptions.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+          <span style={{ color: "#ccc", fontSize: 12 }}>→</span>
+          <select
+            value={rangeEnd}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setRangeEnd(v);
+              if (v < rangeStart) setRangeStart(v);
+            }}
+            style={{
+              flex: 1,
+              padding: "6px 8px",
+              fontSize: 13,
+              border: "1px solid #eee",
+              borderRadius: 6,
+              outline: "none",
+              color: "#1a1a1a",
+              background: "#fff",
+            }}
+          >
+            {yearOptions.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+          {isRangeMode && (
+            <span style={{ fontSize: 11, color: "#e07a7a", flexShrink: 0 }}>
+              {rangeEnd - rangeStart + 1}年
+            </span>
+          )}
         </div>
 
         {/* Category Tabs - horizontal scroll */}
@@ -144,9 +242,9 @@ export default function EventPicker({
                     type="button"
                     onClick={() => {
                       if (!isActive || def.stackable) {
-                        onAdd(event.id);
+                        handleAdd(event.id);
                       } else {
-                        onRemove(event.id);
+                        handleRemove(event.id);
                       }
                     }}
                     style={{
@@ -188,7 +286,7 @@ export default function EventPicker({
                   {isActive && def.stackable && (
                     <button
                       type="button"
-                      onClick={() => onRemove(event.id)}
+                      onClick={() => handleRemove(event.id)}
                       style={{
                         fontSize: 10,
                         color: "#e07a7a",

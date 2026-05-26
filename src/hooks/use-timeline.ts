@@ -8,6 +8,8 @@ type Action =
   | { type: "SET_YEARS"; startYear: number; endYear: number }
   | { type: "ADD_EVENT"; year: number; eventId: string }
   | { type: "REMOVE_EVENT"; year: number; eventId: string }
+  | { type: "BATCH_ADD_EVENT"; startYear: number; endYear: number; eventId: string }
+  | { type: "BATCH_REMOVE_EVENT"; startYear: number; endYear: number; eventId: string }
   | { type: "MOVE_EVENT"; year: number; fromIndex: number; toIndex: number }
   | { type: "RESET" };
 
@@ -71,6 +73,22 @@ function reducer(state: Timeline, action: Action): Timeline {
       return { ...state, years: allYears };
     }
 
+    case "BATCH_ADD_EVENT": {
+      let s = state;
+      for (let y = action.startYear; y <= action.endYear; y++) {
+        s = reducer(s, { type: "ADD_EVENT", year: y, eventId: action.eventId });
+      }
+      return s;
+    }
+
+    case "BATCH_REMOVE_EVENT": {
+      let s = state;
+      for (let y = action.startYear; y <= action.endYear; y++) {
+        s = reducer(s, { type: "REMOVE_EVENT", year: y, eventId: action.eventId });
+      }
+      return s;
+    }
+
     case "MOVE_EVENT": {
       const yearEntry = getOrCreateYear(state.years, action.year);
       const events = [...yearEntry.events];
@@ -112,7 +130,17 @@ export function useTimeline() {
       dispatch({ type: "MOVE_EVENT", year, fromIndex, toIndex }),
     []
   );
+  const batchAddEvent = useCallback(
+    (startYear: number, endYear: number, eventId: string) =>
+      dispatch({ type: "BATCH_ADD_EVENT", startYear, endYear, eventId }),
+    []
+  );
+  const batchRemoveEvent = useCallback(
+    (startYear: number, endYear: number, eventId: string) =>
+      dispatch({ type: "BATCH_REMOVE_EVENT", startYear, endYear, eventId }),
+    []
+  );
   const reset = useCallback(() => dispatch({ type: "RESET" }), []);
 
-  return { timeline, setTitle, setYears, addEvent, removeEvent, moveEvent, reset };
+  return { timeline, setTitle, setYears, addEvent, removeEvent, batchAddEvent, batchRemoveEvent, moveEvent, reset };
 }
